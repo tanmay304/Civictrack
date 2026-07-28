@@ -2,10 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
+import { auth } from "../../lib/firebase";
 
 import React, { useState } from "react";
 import { useCivic } from "../../context/CivicContext";
-import { ShieldCheck, LogIn, Sparkles, Key, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+import {
+  ShieldCheck,
+  Sparkles,
+  AlertCircle,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
 import { motion } from "motion/react";
 
 interface AdminLoginProps {
@@ -14,32 +21,78 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onBackToCitizen }) => {
-  const { signIn, signInDemo, user, profile, authError, setAuthError } = useCivic();
-  const [loading, setLoading] = useState(false);
+  const { signIn, signInDemo, authError, setAuthError } = useCivic();
+const [loading, setLoading] = useState(false);
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setAuthError(null);
-    try {
-      await signIn();
-      // If user logs in with admin rights, redirect to portal
-      onLoginSuccess();
-    } catch (err: any) {
-      console.error("Admin sign-in error:", err);
-    } finally {
-      setLoading(false);
+const ADMIN_EMAIL = "tanmay.sa.thorat@gmail.com";
+
+const handleGoogleSignIn = async () => {
+  setLoading(true);
+  setAuthError(null);
+
+  try {
+
+    const user = await signIn();
+
+    const currentUser = user || auth.currentUser;
+
+    if (!currentUser) {
+      setAuthError("Unable to verify user account.");
+      return;
     }
-  };
 
-  const handleDemoAdminLogin = () => {
-    setLoading(true);
-    signInDemo("admin");
+
+    if (currentUser.email !== ADMIN_EMAIL) {
+
+      setAuthError(
+        "Access denied. Only the authorised administrator can access this portal."
+      );
+
+      await auth.signOut();
+
+      return;
+    }
+
+
+    onLoginSuccess();
+
+
+  } catch (error) {
+
+    console.error("Admin login error:", error);
+
+    setAuthError(
+      "Authentication failed. Please try again."
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
+
+const handleDemoAdminLogin = async () => {
+  setLoading(true);
+  setAuthError(null);
+
+  try {
+
+    await signInDemo("admin");
+
     setTimeout(() => {
       setLoading(false);
       onLoginSuccess();
-    }, 400);
-  };
+    }, 500);
 
+  } catch (error) {
+
+    console.error("Demo admin login error:", error);
+    setAuthError("Demo login failed.");
+    setLoading(false);
+
+  }
+};
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
       <motion.div 

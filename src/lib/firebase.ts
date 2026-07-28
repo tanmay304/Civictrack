@@ -1,14 +1,10 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { 
-  getFirestore, 
-  doc, 
-  getDocFromServer, 
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+
+import {
+  getFirestore,
+  doc,
+  getDocFromServer,
   collection,
   query,
   where,
@@ -22,13 +18,14 @@ import {
   Timestamp,
   increment
 } from "firebase/firestore";
+
 import firebaseConfig from "../../firebase-applet-config.json";
 
-// Initialize Firebase App
+
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Services
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
+export const db = getFirestore(app);
+
 export const auth = getAuth(app);
 
 export const googleProvider = new GoogleAuthProvider();
