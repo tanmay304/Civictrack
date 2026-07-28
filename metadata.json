@@ -1,0 +1,9 @@
+{
+  "name": "CivicTrack",
+  "description": "Civic issue-reporting and tracking platform for local communities.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

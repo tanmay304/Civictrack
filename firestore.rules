@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Match user profiles - public-read, authenticated-write
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+      
+      // Bookmarks subcollection
+      match /bookmarks/{issueId} {
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // Match civic issues
+    match /issues/{issueId} {
+      allow read: if true; // public-read
+      
+      // 1. Any authenticated user can create with their own uid as reporterId, 
+      // or unauthenticated guests can create with null reporterId and "Community member" reporterName.
+      allow create: if (isSignedIn() && request.resource.data.reporterId == request.auth.uid)
+        || (!isSignedIn() && request.resource.data.reporterId == null && request.resource.data.reporterName == "Community member");
+
+      // 2. Keep verification and AI categorization working identically for guest-submitted issues.
+      // Only the original reporter or an admin can edit/delete, guest issues only editable/deletable by admin.
+      allow update: if (
+        // Action A: AI categorization updates (allowed for anyone, guest or signed-in)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['category', 'severity', 'aiCategory', 'aiSeverity', 'aiDescription'])
+      ) || (
+        // Action B: Upvoting / Verification (allowed for any authenticated user)
+        isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvoteCount', 'status', 'statusHistory'])
+      ) || (
+        // Action C: Edit or status transition (allowed only for original reporter or admin)
+        isSignedIn() && (
+          (resource.data.reporterId != null && resource.data.reporterId == request.auth.uid)
+          || isAdmin()
+        )
+      );
+
+      allow delete: if isSignedIn() && (
+        (resource.data.reporterId != null && resource.data.reporterId == request.auth.uid)
+        || isAdmin()
+      );
+
+      // Subcollection of issue verifications - public-read, authenticated-write
+      match /verifications/{userId} {
+        allow read: if true;
+        allow write: if isSignedIn();
+      }
+      
+      // Subcollection of issue comments
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow delete: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      }
+    }
+  }
+}

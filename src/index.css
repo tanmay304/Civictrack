@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom palette matching user requirements */
+  --color-civic-blue: #2D5BFF;
+  --color-signal-orange: #FF8A4C;
+  --color-resolved-green: #34C77B;
+  --color-spark-yellow: #FFC93C;
+  --color-ink: #1A1F36;
+  --color-cloud: #F7F8FC;
+}
+
+/* Base elements style layer */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+}
+
+.dark body {
+  background-color: var(--color-slate-950);
+  color: var(--color-slate-50);
+}
+
+/* Playful, thick-border "Sticker Badge" layout styling classes */
+.sticker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 9999px;
+  padding: 0.25rem 0.65rem;
+  font-weight: 700;
+  font-size: 0.7rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background-color: white;
+  transition: all 0.15s ease-out;
+}
+
+.dark .sticker-badge {
+  border-color: var(--color-slate-700);
+  background-color: var(--color-slate-900);
+}
+
+.sticker-badge:hover {
+  transform: translateY(-0.5px);
+  filter: brightness(0.98);
+}
+
+.sticker-badge-blue {
+  border-color: rgba(45, 91, 255, 0.3);
+  background-color: rgba(45, 91, 255, 0.06);
+  color: var(--color-civic-blue);
+}
+
+.sticker-badge-orange {
+  border-color: rgba(255, 138, 76, 0.3);
+  background-color: rgba(255, 138, 76, 0.06);
+  color: var(--color-signal-orange);
+}
+
+.sticker-badge-green {
+  border-color: rgba(52, 199, 123, 0.3);
+  background-color: rgba(52, 199, 123, 0.06);
+  color: var(--color-resolved-green);
+}
+
+.sticker-badge-yellow {
+  border-color: rgba(255, 201, 60, 0.4);
+  background-color: rgba(255, 201, 60, 0.06);
+  color: #D29A00;
+}
+
+.sticker-badge-ink {
+  border-color: rgba(26, 31, 54, 0.2);
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+}
+
+.dark .sticker-badge-ink {
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--color-slate-800);
+  color: var(--color-slate-200);
+}
