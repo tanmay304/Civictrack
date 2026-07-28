@@ -106,7 +106,7 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue }) => {
     return () => unsubscribe();
   }, [isDetailOpen, issue.id]);
 
-  const isAdmin = profile?.isAdmin || user?.email === "rushabhchopda070@gmail.com";
+  const isAdmin = profile?.isAdmin || profile?.role === "admin" || user?.email === "tanmay.sa.thorat@gmail.com";
   
   // Verification states
   const [verifications, setVerifications] = useState<any[]>([]);

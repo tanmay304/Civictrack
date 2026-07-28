@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { UserBadge } from "./UserBadge";
 
 interface NavbarProps {
-  onNavigate: (tab: "landing" | "dashboard" | "feed" | "report" | "map" | "profile" | "emergency") => void;
+  onNavigate: (tab: "landing" | "dashboard" | "feed" | "report" | "map" | "profile" | "emergency" | "admin-portal" | "admin-login") => void;
   activeTab: string;
 }
 
@@ -169,6 +169,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeTab }) => {
             >
               <Phone className="h-4 w-4 animate-pulse" />
               <span>Emergency</span>
+            </button>
+
+            {/* Admin Portal Button */}
+            <button
+              onClick={() => onNavigate("admin-portal")}
+              className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-2xl border-2 font-black uppercase tracking-widest text-xs transition-all shadow-sm cursor-pointer focus:outline-none focus:ring-0 ${
+                activeTab === "admin-portal" || activeTab === "admin-login"
+                  ? "bg-purple-600 text-white border-purple-800 shadow-[2px_2px_0px_#1A1F36]"
+                  : "bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 text-purple-700 dark:text-purple-300 border-purple-400 dark:border-purple-800 hover:-translate-y-0.5"
+              }`}
+              id="nav-btn-admin-portal"
+            >
+              <ShieldAlert className="h-4 w-4" />
+              <span>Admin Portal</span>
             </button>
 
             {/* Vertical separator */}

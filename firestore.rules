@@ -2,74 +2,86 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Global Safety Net
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // Global Helpers
-    function isSignedIn() {
+    // Helper functions
+    function isAuthenticated() {
       return request.auth != null;
     }
 
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
     function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      return isAuthenticated() && 
+        (getUserData().role == 'admin' || getUserData().isAdmin == true || request.auth.token.email == 'tanmay.sa.thorat@gmail.com');
     }
 
-    // Match user profiles - public-read, authenticated-write
+    function isModerator() {
+      return isAuthenticated() && 
+        (isAdmin() || getUserData().role == 'moderator');
+    }
+
+    // Users Collection - Strictly prevent non-admins from altering role, status, or isAdmin
     match /users/{userId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-      
-      // Bookmarks subcollection
-      match /bookmarks/{issueId} {
-        allow read: if isSignedIn() && request.auth.uid == userId;
-        allow write: if isSignedIn() && request.auth.uid == userId;
-      }
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId) && request.resource.data.role == 'citizen';
+      allow update: if isAdmin() || (
+        isOwner(userId) && 
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'isAdmin']))
+      );
+      allow delete: if isAdmin();
     }
 
-    // Match civic issues
+    // Issues / Reports Collection
     match /issues/{issueId} {
-      allow read: if true; // public-read
-      
-      // 1. Any authenticated user can create with their own uid as reporterId, 
-      // or unauthenticated guests can create with null reporterId and "Community member" reporterName.
-      allow create: if (isSignedIn() && request.resource.data.reporterId == request.auth.uid)
-        || (!isSignedIn() && request.resource.data.reporterId == null && request.resource.data.reporterName == "Community member");
+      allow read: if true; // Public viewable civic feed
+      allow create: if true; // Allows citizens & guests to report issues
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
 
-      // 2. Keep verification and AI categorization working identically for guest-submitted issues.
-      // Only the original reporter or an admin can edit/delete, guest issues only editable/deletable by admin.
-      allow update: if (
-        // Action A: AI categorization updates (allowed for anyone, guest or signed-in)
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['category', 'severity', 'aiCategory', 'aiSeverity', 'aiDescription'])
-      ) || (
-        // Action B: Upvoting / Verification (allowed for any authenticated user)
-        isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvoteCount', 'status', 'statusHistory'])
-      ) || (
-        // Action C: Edit or status transition (allowed only for original reporter or admin)
-        isSignedIn() && (
-          (resource.data.reporterId != null && resource.data.reporterId == request.auth.uid)
-          || isAdmin()
-        )
-      );
-
-      allow delete: if isSignedIn() && (
-        (resource.data.reporterId != null && resource.data.reporterId == request.auth.uid)
-        || isAdmin()
-      );
-
-      // Subcollection of issue verifications - public-read, authenticated-write
+      // Verifications subcollection
       match /verifications/{userId} {
         allow read: if true;
-        allow write: if isSignedIn();
+        allow write: if isOwner(userId);
       }
-      
-      // Subcollection of issue comments
-      match /comments/{commentId} {
-        allow read: if true;
-        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-        allow delete: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
-      }
+    }
+
+    // Reports collection alias
+    match /reports/{reportId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Notifications Collection
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Activity Logs Collection
+    match /activityLogs/{logId} {
+      allow read: if isModerator();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Settings Collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Categories Collection
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

@@ -190,12 +190,16 @@ export const Dashboard: React.FC = () => {
       const usersList: UserProfile[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
+        const role = data.role || (data.isAdmin ? "admin" : "citizen");
+        const status = data.status || "active";
         usersList.push({
           uid: doc.id,
           name: data.name || "Civic Member",
+          role,
+          status,
           points: data.points || 0,
           badges: data.badges || [],
-          isAdmin: data.isAdmin || false
+          isAdmin: role === "admin"
         });
       });
       setLeaderboard(usersList);

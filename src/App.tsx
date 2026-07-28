@@ -14,6 +14,8 @@ import { ReportForm } from "./components/ReportForm";
 import { InteractiveMap } from "./components/InteractiveMap";
 import { Dashboard } from "./components/Dashboard";
 import { EmergencyContacts } from "./components/EmergencyContacts";
+import { AdminLayout } from "./components/admin/AdminLayout";
+import { AdminLogin } from "./components/admin/AdminLogin";
 import { 
   ShieldAlert, 
   MapPin, 
@@ -35,7 +37,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 function AppContent() {
   const { user, profile, issues, loadingIssues, signIn, authError, setAuthError, signInDemo } = useCivic();
-  const [activeTab, setActiveTab] = useState<"landing" | "dashboard" | "feed" | "report" | "map" | "profile" | "emergency">("landing");
+  const [activeTab, setActiveTab] = useState<"landing" | "dashboard" | "feed" | "report" | "map" | "profile" | "emergency" | "admin-portal" | "admin-login">("landing");
   
   // Filtering & Search state
   const [searchTerm, setSearchTerm] = useState("");
@@ -103,6 +105,14 @@ function AppContent() {
     issues.forEach(i => list.add(i.category));
     return Array.from(list);
   }, [issues]);
+
+  if (activeTab === "admin-portal") {
+    return <AdminLayout onBackToCitizen={() => setActiveTab(user ? "dashboard" : "landing")} />;
+  }
+
+  if (activeTab === "admin-login") {
+    return <AdminLogin onLoginSuccess={() => setActiveTab("admin-portal")} onBackToCitizen={() => setActiveTab("landing")} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col text-slate-900 dark:text-slate-50 antialiased font-sans">
