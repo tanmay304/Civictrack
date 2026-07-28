@@ -1,10 +1,10 @@
 {
-  "projectId": "gen-lang-client-0513621027",
-  "appId": "1:942961028073:web:85b77a49065b272f68b978",
-  "apiKey": "AIzaSyBA_QU2Biw1wlTffU5btJaj34n3XPg3dBg",
-  "authDomain": "gen-lang-client-0513621027.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-b870ea6d-40b2-4c97-a6a6-bcc76573f1b8",
-  "storageBucket": "gen-lang-client-0513621027.firebasestorage.app",
-  "messagingSenderId": "942961028073",
-  "measurementId": ""
+  "projectId": "civictrack-3514b",
+  "appId": "1:159184804109:web:33fcfdb859d7802b8d3844",
+  "apiKey": "AIzaSyCFabmrpaHf36u3RLaSgt8rgUcHDzPJEXU",
+  "authDomain": "civictrack-3514b.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "civictrack-3514b.firebasestorage.app",
+  "messagingSenderId": "159184804109",
+  "measurementId": "G-3XLKTHSZBN"
 }
